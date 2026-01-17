@@ -215,6 +215,8 @@ def buildFeed():
     with open(PUBLIC_DIR + 'feed.xml', 'w') as outfile:
         outfile.write(feed)
 
+
+
 # main
 def main():
 
@@ -232,6 +234,8 @@ def main():
         buildFeed()
 
     print("Done! All pages are in " + PUBLIC_DIR)
+
+
 
 if __name__ == "__main__":
     main()

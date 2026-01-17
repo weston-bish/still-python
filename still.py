@@ -16,7 +16,7 @@ from datetime import datetime
 # This first chunk is for RSS generation. Feel free to adjust these values.
 WEBSITE_URL = "https://github.com/weston-bish/still"
 WEBSITE_TITLE = "Still"
-GENERATE_RSS = True
+GENERATE_RSS = False
 FEED_LENGTH = 10
 
 # These are the locations of directories and files for the project

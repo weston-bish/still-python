@@ -6,22 +6,25 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 import shutil
-import markdown #markdown.markdown(text)
+import markdown
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
+
+
 # Global Variables
-WEBSITE_URL = "https://www.westonbishop.com"
-WEBSITE_TITLE = "WestonBishop.com"
+# This first chunk is for RSS generation. Feel free to adjust these values.
+WEBSITE_URL = "https://github.com/weston-bish/still"
+WEBSITE_TITLE = "Still"
 GENERATE_RSS = True
 FEED_LENGTH = 10
 
+# These are the locations of directories and files for the project
 CONTENT_DIR = "content/"
 POSTS_DIR = CONTENT_DIR + "posts"
 INCLUDE_DIR = "include/"
 PUBLIC_DIR = "public/"
 IMG_DIR = INCLUDE_DIR + "img"
-
 HEADER = INCLUDE_DIR + "header.html"
 FOOTER = INCLUDE_DIR + "footer.html"
 
@@ -41,23 +44,23 @@ homepage_list = []
 # Copies static assets such as images and stylesheet.
 def copyAssets():
 
-    print( "Copying static assets..." )
+    print("Copying static assets...")
 
     # copy images
-    shutil.copytree( Path( IMG_DIR ), PUBLIC_DIR + "img" )
+    shutil.copytree(Path(IMG_DIR), PUBLIC_DIR + "img")
 
     # copy stylesheet
-    shutil.copy( Path( INCLUDE_DIR + "style.css"), PUBLIC_DIR)
+    shutil.copy(Path(INCLUDE_DIR + "style.css"), PUBLIC_DIR)
 
 # Builds the posts
 def buildPosts():
 
     content = ""
-    dir_path = Path( POSTS_DIR )
+    dir_path = Path(POSTS_DIR)
 
+    # Iterate through posts directory and render the files into posts
     for item in dir_path.iterdir():
-        print(item)
-
+        
         if item.is_file():
 
             with open(item, 'r') as file:
@@ -67,11 +70,15 @@ def buildPosts():
 
             for line in lines:
                 clean_line = line.strip()
+
                 if clean_line:
                     data_elements = clean_line.split(': ')
+
+                    # Parse metadata block
                     if data_elements[0] == "title":
                         title = data_elements[1]
-                        print( "Found post: " + title )
+                        print("Found post: " + title)
+
                     if data_elements[0] == "date":
                         date = data_elements[1]
         
@@ -79,7 +86,9 @@ def buildPosts():
             outpath = PUBLIC_DIR + "posts/" + base + ".html"
             post_body = markdown.markdown(content)
 
+            # write to new file in public
             with open(outpath, 'w') as outfile:
+
                 with open(HEADER, 'r') as infile:
                     shutil.copyfileobj(infile, outfile)
 
@@ -88,17 +97,19 @@ def buildPosts():
                 with open(FOOTER, 'r') as infile:
                     shutil.copyfileobj(infile, outfile)
 
+            # this is a bulleted list of posts that will be added to the homepage later
             homepage_list.append("<li><span class='post-date'>" + date + "</span> - <a href='posts/" + base + ".html'>" + title + "</a></li>")
 
             url = WEBSITE_URL + "/posts/" + base + ".html"
             newpost = Post(title, date, url, post_body)
-            postsList.append(newpost)
+            postsList.append(newpost) # this is for RSS later
 
 # Constructs the homepage
 def buildIndex():
 
     print("Building homepage...")    
 
+    # Sorts the list of posts by date
     homepage_list.sort()
 
     # Optional: include index.html in content/ to get a block on homepage for welcome text.
@@ -106,23 +117,30 @@ def buildIndex():
     index_path = CONTENT_DIR + "index.md"
 
     if os.path.isfile(index_path):
+
         with open(index_path, 'r') as file:
             content = file.read()
-            intro_html = markdown.markdown(content)
+
+        intro_html = markdown.markdown(content)
 
     outpath = PUBLIC_DIR + "index.html"
 
     with open(outpath, 'w') as outfile:
+
+        # Copy header
         with open(HEADER, 'r') as infile:
             shutil.copyfileobj(infile, outfile)
 
+        # Copy intro_html
         outfile.write(intro_html + "<h1>Posts</h1><ul>\n")
 
+        # Copy list of posts
         for item in homepage_list:
             outfile.write(item + "\n")
 
         outfile.write("</ul>")
 
+        # Copy footer
         with open(FOOTER, 'r') as infile:
             shutil.copyfileobj(infile, outfile)
 
@@ -131,8 +149,9 @@ def buildChildren():
 
     print("Building other pages...")
 
-    dir_path = Path( CONTENT_DIR )
+    dir_path = Path(CONTENT_DIR)
 
+    # iterate through other files in content and generate them to markdown
     for item in dir_path.iterdir():
 
         if item.is_file():
@@ -159,17 +178,23 @@ def buildChildren():
 # Builds RSS feed and puts it in feed.xml
 def buildFeed():
 
+    print("Building RSS feed...")
+
+    # Sort posts by date
     sorted_posts = sorted(postsList, key=lambda x: x.date)
 
     rss = ET.Element('rss', version='2.0')
     channel = ET.SubElement(rss, 'channel')
 
+    # This is for the channel
     ET.SubElement(channel, 'title').text = WEBSITE_TITLE
     ET.SubElement(channel, 'link').text = WEBSITE_URL
     ET.SubElement(channel, 'description').text = WEBSITE_TITLE
     ET.SubElement(channel, 'lastBuildDate').text = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S +0000')
 
     i = FEED_LENGTH
+
+    # This is for the channel items (aka posts)
     for post in sorted_posts:
         item = ET.SubElement(channel, 'item')
         ET.SubElement(item, 'title').text = post.title
@@ -180,29 +205,33 @@ def buildFeed():
         ET.SubElement(item, 'pubDate').text = dt.strftime("%a, %d %b %Y %H:%M:%S +0000")
 
         i = i - 1
+
         if i == 0:
             break
 
     feed = ET.tostring(rss, encoding='utf-8', xml_declaration=True).decode('utf-8')
 
+    # write to feed.xml
     with open(PUBLIC_DIR + 'feed.xml', 'w') as outfile:
         outfile.write(feed)
 
 # main
 def main():
 
-    shutil.rmtree( Path( PUBLIC_DIR ), ignore_errors=True )
-    os.makedirs( PUBLIC_DIR + "posts" )
+    # clean up old public directory
+    shutil.rmtree(Path(PUBLIC_DIR), ignore_errors=True)
+    os.makedirs(PUBLIC_DIR + "posts")
 
     copyAssets()
     buildPosts()
     buildIndex()
     buildChildren()
 
+    # Generate RSS feed if set to true
     if GENERATE_RSS:
         buildFeed()
 
-    print( "Done! All pages are in " + PUBLIC_DIR )
+    print("Done! All pages are in " + PUBLIC_DIR)
 
 if __name__ == "__main__":
     main()

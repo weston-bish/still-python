@@ -3,7 +3,7 @@
 **still** is a super-minimal static site generator designed for small personal blogs.  
 It converts Markdown files into simple HTML pages using Python's `markdown` module and combines them with a header and footer to produce fast, portable, brutally minimal websites.
 
-The goal of still is to make it **as simple as possible to publish a blog**. It is designed for personal use primarily.
+The goal of still is to make it **as simple as possible to publish a blog**.
 
 ---
 

@@ -24,16 +24,21 @@ The goal of still is to make it **as simple as possible to publish a blog**.
 
 ```
 .
-├── still.py
 ├── content
+│   ├── about.md
 │   ├── index.md
 │   └── posts
 │       └── test.md
-└── include
-    ├── footer.html
-    ├── header.html
-    ├── img
-    └── style.css
+├── LICENSE
+├── README.md
+├── static
+│   ├── img
+│   │   └── cat.png
+│   └── style.css
+├── still.py
+└──templates
+   ├── footer.html
+   └── header.html
 ```
 
 ---

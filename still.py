@@ -22,11 +22,11 @@ FEED_LENGTH = 10
 # These are the locations of directories and files for the project
 CONTENT_DIR = "content/"
 POSTS_DIR = CONTENT_DIR + "posts"
-INCLUDE_DIR = "include/"
+STATIC_DIR = "static/"
 PUBLIC_DIR = "public/"
-IMG_DIR = INCLUDE_DIR + "img"
-HEADER = INCLUDE_DIR + "header.html"
-FOOTER = INCLUDE_DIR + "footer.html"
+TEMPLATE_DIR = "templates/"
+HEADER = TEMPLATE_DIR + "header.html"
+FOOTER = TEMPLATE_DIR + "footer.html"
 
 @dataclass
 class Post:
@@ -46,11 +46,11 @@ def copyAssets():
 
     print("Copying static assets...")
 
-    # copy images
-    shutil.copytree(Path(IMG_DIR), PUBLIC_DIR + "img")
-
-    # copy stylesheet
-    shutil.copy(Path(INCLUDE_DIR + "style.css"), PUBLIC_DIR)
+    if Path(STATIC_DIR).exists():
+    # copy static assets
+        shutil.copytree(Path(STATIC_DIR), PUBLIC_DIR, dirs_exist_ok=True)
+    else:
+        print("static/ not found.")
 
 # Builds the posts
 def buildPosts():
